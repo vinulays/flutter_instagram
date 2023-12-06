@@ -1,20 +1,26 @@
+import "dart:typed_data";
+
 import "package:flutter/material.dart";
 import "package:flutter_instagram/resources/auth_methods.dart";
 import "package:flutter_instagram/utils/colors.dart";
 import "package:flutter_instagram/utils/utils.dart";
 import "package:flutter_instagram/widgets/text_field_input.dart";
 import "package:flutter_svg/flutter_svg.dart";
+import "package:image_picker/image_picker.dart";
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignupScreen extends StatefulWidget {
+  const SignupScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _bioController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  Uint8List? _image;
   bool _isLoading = false;
 
   @override
@@ -22,24 +28,37 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _bioController.dispose();
+    _usernameController.dispose();
   }
 
-  void loginUser() async {
+  void selectImage() async {
+    Uint8List im = await pickImage(ImageSource.gallery);
+    setState(() {
+      _image = im;
+    });
+  }
+
+  void signUpUser() async {
     setState(() {
       _isLoading = true;
     });
-    String res = await AuthMethods().loginUser(
-        email: _emailController.text, password: _passwordController.text);
+    String res = await AuthMethods().signUpUser(
+        email: _emailController.text,
+        password: _passwordController.text,
+        username: _usernameController.text,
+        bio: _bioController.text,
+        file: _image!);
 
-    if (res == "Success") {
-      // * if login success
-    } else {
-      // * if login not success
-      showSnackBar(res, context);
-    }
     setState(() {
       _isLoading = false;
     });
+
+    if (res != "success") {
+      showSnackBar(res, context);
+    } else {
+      showSnackBar("Signup successfull!", context);
+    }
   }
 
   @override
@@ -68,6 +87,39 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(
                   height: 64,
                 ),
+                // * circular widget to accpet and show user avatar
+                Stack(
+                  children: [
+                    _image != null
+                        ? CircleAvatar(
+                            radius: 64,
+                            backgroundImage: MemoryImage(_image!),
+                          )
+                        : const CircleAvatar(
+                            radius: 64,
+                            backgroundImage:
+                                AssetImage("assets/user_default.png"),
+                          ),
+                    Positioned(
+                      bottom: -10,
+                      left: 80,
+                      child: IconButton(
+                        onPressed: selectImage,
+                        icon: const Icon(Icons.add_a_photo),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 24,
+                ),
+                TextFieldInput(
+                    textEditingController: _usernameController,
+                    hintText: "Enter your username",
+                    textInputType: TextInputType.text),
+                const SizedBox(
+                  height: 24,
+                ),
                 // * text field input for email
                 TextFieldInput(
                     textEditingController: _emailController,
@@ -86,9 +138,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(
                   height: 24,
                 ),
+                TextFieldInput(
+                    textEditingController: _bioController,
+                    hintText: "Enter your bio",
+                    textInputType: TextInputType.text),
+                const SizedBox(
+                  height: 24,
+                ),
                 // * login button
                 InkWell(
-                  onTap: loginUser,
+                  onTap: signUpUser,
                   child: Container(
                     width: double.infinity,
                     alignment: Alignment.center,
@@ -106,7 +165,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               color: primaryColor,
                             ),
                           )
-                        : const Text("Log in"),
+                        : const Text("Sign up"),
                   ),
                 ),
                 const SizedBox(
