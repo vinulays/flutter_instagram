@@ -1,40 +1,40 @@
+# 1
 on:
-  pull_request:
-    branches:
-      - main
-      - master
+  # 2
   push:
-    branches:
-      - main
-      - master
-      - develop
-name: "Build & Release"
-jobs: 
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+  # 3
+  workflow_dispatch:
+
+# 4
+jobs:
+  # 5
   build:
-    name: Build & Release
-    runs-on: macos-latest
-    steps: 
-      -uses: actions/checkout@v1
-      -uses: actions/setup-java@v1
-       with:
-        java-version: "1.8.x"
-      -uses: subosito/flutter-action@v1
-       with:
-        flutter-version: "3.13.9"
-      -run: flutter pub get
-      -run: flutter test
-      -run: flutter build apk --debug --split-per-abi
-      -name: Push to Releases
-       uses: ncipollo/release-action@v1  
-       with:
-        artifacts: "build/app/outputs/apk/debug/*"
-        tag: v1.0.${{ github.run_number }}
-        token: ${{ secrets.TOKEN }}
-      
+    # 6
+    runs-on: ubuntu-latest
 
+    # 7
+    steps:
+      # 8
+      - uses: actions/checkout@v3
+      # 9
+      - uses: actions/setup-java@v3
+        with:
+          distribution: "zulu"
+          java-version: "12.x"
+      # 10
+      - uses: subosito/flutter-action@v2
+        with:
+          # 11
+          flutter-version: "3.0.0"
+          channel: "stable"
+      # 12
+      - name: Get dependencies
+        run: flutter pub get
 
-
-
-
-# push to master, main ,develop
-#  pull request on main master
+      # Runs a set of commands using the runners shell
+      - name: Start release build
+        run: flutter build appbundle
