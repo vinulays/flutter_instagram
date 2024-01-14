@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:flutter_instagram/resources/auth_methods.dart";
+import "package:flutter_instagram/screens/home_screen.dart";
 import "package:flutter_instagram/utils/colors.dart";
 import "package:flutter_instagram/utils/utils.dart";
 import "package:flutter_instagram/widgets/text_field_input.dart";
@@ -33,6 +34,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (res == "Success") {
       // * if login success
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomeScreen()));
     } else {
       // * if login not success
       showSnackBar(res, context);
@@ -70,9 +73,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 // * text field input for email
                 TextFieldInput(
-                    textEditingController: _emailController,
-                    hintText: "Enter your email",
-                    textInputType: TextInputType.emailAddress),
+                  textEditingController: _emailController,
+                  hintText: "Enter your email",
+                  textInputType: TextInputType.emailAddress,
+                ),
                 const SizedBox(
                   height: 24,
                 ),
